@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quà Sinh Nhật</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background: #000;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    .center-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .gift-box {
+      font-size: 80px;
+      cursor: pointer;
+      animation: bounce 1s infinite alternate;
+      display: inline-block;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-15px); }
+    }
+
+    .shake {
+      animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(-5px, 0); }
+      50% { transform: translate(5px, 0); }
+      75% { transform: translate(-5px, 0); }
+      100% { transform: translate(0, 0); }
+    }
+
+    #hint {
+      margin-top: 15px;
+      font-size: 16px;
+      color: #ff99cc;
+    }
+
+    .message {
+      display: none;
+      margin-top: 40px;
+      font-size: 18px;
+      line-height: 1.6;
+      max-width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+      word-wrap: break-word;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .message h1 {
+      font-size: 26px;
+      line-height: 1.4;
+    }
+
+    .highlight {
+      color: #ff99cc;
+      font-weight: bold;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @media (max-width: 600px) {
+      .message { font-size: 16px; }
+      .message h1 { font-size: 22px; }
+      .gift-box { font-size: 70px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="center-box" id="gift-section">
+    <div class="gift-box" id="gift">🎁</div>
+    <p id="hint">Bấm vào hộp quà để mở...</p>
+  </div>
+
+  <div class="message" id="msg">
+    <h1>🎈 Happy Birday Huyền Trang 🎈</h1>
+    <p>Chúc em sinh nhật vui vẻ.Tuổi mới rực rỡ bùng choáy 🔥, tiền vào như nước 8386 muốn gì được nấy nha em 🎉.</p>
+    <p>Cứ vui tươi mát mát tẻn tẻn như vậy thôi nhé, đừng có suy nhiều, đừng có chán nản cái qq gì hết nheng 💥🎊.</p>
+    <p>Tuy chị chỉ có mấy lời chúc ngắn ngủi như này thôi mong em đừng chê nhó vì đây là những lời chúc chân thành nhất chị dành tặng cho em ó 🥰</p>
+    <p class="highlight">-Mãi hạnh phúc nha bé con😘-</p>
+  </div>
+
+  <canvas id="fireworks"></canvas>
+
+  <script>
+    let clicks = 0;
+    const gift = document.getElementById("gift");
+    const msg = document.getElementById("msg");
+    const hint = document.getElementById("hint");
+    const giftSection = document.getElementById("gift-section");
+
+    gift.addEventListener("click", () => {
+      clicks++;
+      gift.classList.add("shake");
+      setTimeout(() => gift.classList.remove("shake"), 300);
+
+      if (clicks < 3) {
+        hint.innerText = `Còn ${3 - clicks} lần nữa mới mở được 🎁`;
+      } else {
+        giftSection.style.display = "none";
+        msg.style.display = "block";
+        createFirework(window.innerWidth/2, window.innerHeight/2);
+
+        // scroll mượt xuống lời chúc
+        msg.scrollIntoView({ behavior: "smooth" });
+      }
+    });
+
+    // ----- Fireworks -----
+    const canvas = document.getElementById('fireworks');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let particles = [];
+    function random(min, max) { return Math.random() * (max - min) + min; }
+    function createFirework(x, y) {
+      const count = 100;
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 * i) / count;
+        const speed = random(2, 6);
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          alpha: 1,
+          size: random(2, 4),
+          color: `hsl(${random(0, 360)}, 100%, 60%)`
+        });
+      }
+    }
+    function updateParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy;
+        p.vy += 0.02; p.alpha -= 0.01;
+        if (p.alpha <= 0) particles.splice(i, 1);
+      }
+    }
+    function drawParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const p of particles) {
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+    function loop() {
+      updateParticles();
+      drawParticles();
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+
+</body>
+</html>
